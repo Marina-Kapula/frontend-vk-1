@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import "./App.css";
 
-// список скульптур (пока статичный)
-const sculptures = [
+// стартовый список скульптур
+const initialSculptures = [
   {
     id: 1,
     title: "Bear",
@@ -21,11 +21,19 @@ const sculptures = [
 ];
 
 function App() {
-  // флаг: вошёл ли владелец
   const [isOwner, setIsOwner] = useState(false);
+  const [sculptures, setSculptures] = useState(initialSculptures);
+  const [nextId, setNextId] = useState(4);
 
-  // простая фейковая авторизация (для экзамена)
+  const [isAdding, setIsAdding] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newFile, setNewFile] = useState(null);
+
+  const [activeSculpture, setActiveSculpture] = useState(null);
+
   const handleOwnerLogin = () => {
+    if (isOwner) return;
+
     const password = window.prompt("Enter owner password:");
     if (password === "admin123") {
       setIsOwner(true);
@@ -33,6 +41,60 @@ function App() {
     } else {
       alert("Wrong password");
     }
+  };
+
+  const handleOwnerLogout = () => {
+    setIsOwner(false);
+    setIsAdding(false);
+    setNewTitle("");
+    setNewFile(null);
+    setActiveSculpture(null);
+  };
+
+  const handleOpenAddForm = () => {
+    if (!isOwner) return;
+    setIsAdding(true);
+    setNewTitle("");
+    setNewFile(null);
+  };
+
+  const handleCancelAdd = () => {
+    setIsAdding(false);
+    setNewTitle("");
+    setNewFile(null);
+  };
+
+  const handleSaveNew = (event) => {
+    event.preventDefault();
+    if (!newTitle || !newFile) {
+      alert("Please add title and image");
+      return;
+    }
+
+    const imageUrl = URL.createObjectURL(newFile);
+
+    const newSculpture = {
+      id: nextId,
+      title: newTitle,
+      imageUrl,
+    };
+
+    setSculptures((prev) => [...prev, newSculpture]);
+    setNextId((id) => id + 1);
+    setIsAdding(false);
+    setNewTitle("");
+    setNewFile(null);
+  };
+
+  const handleDelete = (id) => {
+    if (!isOwner) return;
+    const ok = window.confirm("Delete this sculpture?");
+    if (!ok) return;
+    setSculptures((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const handleCloseModal = () => {
+    setActiveSculpture(null);
   };
 
   return (
@@ -47,10 +109,20 @@ function App() {
           </p>
         </div>
 
-        {/* кнопка входа владельца */}
-        <button className="owner-button" onClick={handleOwnerLogin}>
-          Owner login
-        </button>
+        <div className="owner-controls">
+          {isOwner ? (
+            <>
+              <span className="owner-status">Owner: logged in</span>
+              <button className="owner-button" onClick={handleOwnerLogout}>
+                Logout
+              </button>
+            </>
+          ) : (
+            <button className="owner-button" onClick={handleOwnerLogin}>
+              Owner login
+            </button>
+          )}
+        </div>
       </header>
 
       <main>
@@ -59,7 +131,11 @@ function App() {
 
           <div className="cards">
             {sculptures.map((item) => (
-              <article className="card" key={item.id}>
+              <article
+                className="card"
+                key={item.id}
+                onClick={() => setActiveSculpture(item)}
+              >
                 <div className="card-image-wrapper">
                   <img
                     src={item.imageUrl}
@@ -69,17 +145,87 @@ function App() {
                 </div>
                 <div className="card-info">
                   <h3 className="card-title">{item.title}</h3>
+                  {isOwner && (
+                    <button
+                      className="delete-button"
+                      onClick={(e) => {
+                        e.stopPropagation(); // чтобы Delete не открывал модалку
+                        handleDelete(item.id);
+                      }}
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
               </article>
             ))}
 
-            {/* кнопка добавления видна только владельцу */}
-            {isOwner && (
+            {isOwner && !isAdding && (
               <article className="card add-card">
-                <button className="add-button">+ Add new sculpture</button>
+                <button className="add-button" onClick={handleOpenAddForm}>
+                  + Add new sculpture
+                </button>
               </article>
             )}
           </div>
+
+          {isOwner && isAdding && (
+            <form className="add-form" onSubmit={handleSaveNew}>
+              <h3>Add new sculpture</h3>
+              <label>
+                Title:
+                <input
+                  type="text"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                />
+              </label>
+              <label>
+                Image:
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setNewFile(e.target.files[0] || null)}
+                />
+              </label>
+              <div className="add-form-buttons">
+                <button type="submit">Save</button>
+                <button type="button" onClick={handleCancelAdd}>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
+
+          {activeSculpture && (
+            <div
+              className="modal-backdrop"
+              onClick={handleCloseModal}
+            >
+              <div
+                className="modal"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  className="modal-close"
+                  onClick={handleCloseModal}
+                >
+                  ✕
+                </button>
+                <div className="modal-image-wrapper">
+                  <img
+                    src={activeSculpture.imageUrl}
+                    alt={activeSculpture.title}
+                    className="modal-image"
+                  />
+                </div>
+                <h3 className="modal-title">{activeSculpture.title}</h3>
+                <p className="modal-description">
+                  Here will be a longer description of the sculpture.
+                </p>
+              </div>
+            </div>
+          )}
         </section>
       </main>
     </div>
