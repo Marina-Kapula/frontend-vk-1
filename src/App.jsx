@@ -3,21 +3,9 @@ import "./App.css";
 
 // стартовый список скульптур
 const initialSculptures = [
-  {
-    id: 1,
-    title: "Bear",
-    imageUrl: "https://via.placeholder.com/400x300",
-  },
-  {
-    id: 2,
-    title: "Watcher I",
-    imageUrl: "https://via.placeholder.com/400x300",
-  },
-  {
-    id: 3,
-    title: "Stone figure",
-    imageUrl: "https://via.placeholder.com/400x300",
-  },
+  { id: 1, title: "Bear", imageUrl: "https://via.placeholder.com/800x600" },
+  { id: 2, title: "Watcher I", imageUrl: "https://via.placeholder.com/800x600" },
+  { id: 3, title: "Stone figure", imageUrl: "https://via.placeholder.com/800x600" },
 ];
 
 function App() {
@@ -93,19 +81,19 @@ function App() {
     setSculptures((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const handleCloseModal = () => {
+  const handleCloseViewer = () => {
     setActiveSculpture(null);
   };
 
   return (
     <div className="page">
       <header className="header">
-        <div>
+        <div className="header-text">
           <h1 className="site-title">Watching sculptures, V.K.</h1>
           <p className="contacts">
-            email: <span>volodimir.kapula@gmail.com</span>
-            {"  "}post number: <span>77570</span>
-            {"  "}address: <span>Jäppilä Huhtimäentie 307</span>
+            email: <span>volodimir.kapula@gmail.com</span>{" "}
+            post number: <span>77570</span>{" "}
+            address: <span>Jäppilä Huhtimäentie 307</span>
           </p>
         </div>
 
@@ -125,7 +113,7 @@ function App() {
         </div>
       </header>
 
-      <main>
+      <main className="main">
         <section className="gallery-section">
           <h2 className="section-title">Gallery</h2>
 
@@ -149,7 +137,7 @@ function App() {
                     <button
                       className="delete-button"
                       onClick={(e) => {
-                        e.stopPropagation(); // чтобы Delete не открывал модалку
+                        e.stopPropagation();
                         handleDelete(item.id);
                       }}
                     >
@@ -196,37 +184,27 @@ function App() {
               </div>
             </form>
           )}
-
-          {activeSculpture && (
-            <div
-              className="modal-backdrop"
-              onClick={handleCloseModal}
-            >
-              <div
-                className="modal"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <button
-                  className="modal-close"
-                  onClick={handleCloseModal}
-                >
-                  ✕
-                </button>
-                <div className="modal-image-wrapper">
-                  <img
-                    src={activeSculpture.imageUrl}
-                    alt={activeSculpture.title}
-                    className="modal-image"
-                  />
-                </div>
-                <h3 className="modal-title">{activeSculpture.title}</h3>
-                <p className="modal-description">
-                  Here will be a longer description of the sculpture.
-                </p>
-              </div>
-            </div>
-          )}
         </section>
+
+        {/* БОЛЬШОЙ БЛОК СНИЗУ — ПОЯВЛЯЕТСЯ ТОЛЬКО ЕСЛИ ЧТО-ТО ВЫБРАНО */}
+        {activeSculpture && (
+          <section className="viewer">
+            <button className="viewer-close" onClick={handleCloseViewer}>
+              ✕
+            </button>
+            <div className="viewer-image-wrapper">
+              <img
+                src={activeSculpture.imageUrl}
+                alt={activeSculpture.title}
+                className="viewer-image"
+              />
+            </div>
+            <h3 className="viewer-title">{activeSculpture.title}</h3>
+            <p className="viewer-description">
+              Here will be a longer description of the sculpture.
+            </p>
+          </section>
+        )}
       </main>
     </div>
   );

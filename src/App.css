@@ -1,94 +1,133 @@
-* {
-  box-sizing: border-box;
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light;
+  color: #213547;
+  background-color: #ffffff;
 }
 
-html,
-body,
-#root {
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+body {
   margin: 0;
-  padding: 0;
-  height: 100%;
-  width: 100%;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-
-/* Вся страница */
-.page {
   min-height: 100vh;
-  width: 100%;
-  padding: 24px 32px;
-  background: #ffffff;
-  color: #111827;
+  background-color: #ffffff;
 }
 
-/* Шапка + кнопка логина */
+/* Обёртка страницы */
+
+.page {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* HEADER */
+
 .header {
-  margin-bottom: 32px;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+.header-text {
+  flex: 1;
+  text-align: center;
 }
 
 .site-title {
-  font-size: 36px;
-  font-weight: 600;
-  margin: 0 0 8px;
+  margin: 0;
+  font-size: 3.2em;
+  line-height: 1.1;
 }
 
 .contacts {
-  font-size: 14px;
-  color: #4b5563;
+  margin: 5px 0 0;
+  font-size: 0.9rem;
 }
 
-.contacts span {
+.owner-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 20px;
+}
+
+.owner-status {
+  font-size: 0.9rem;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
   font-weight: 500;
-}
-
-.owner-button {
-  padding: 8px 14px;
-  border-radius: 6px;
-  border: 1px solid #111827;
-  background: #ffffff;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.owner-button:hover {
-  background: #111827;
+  font-family: inherit;
+  background-color: #1a1a1a;
   color: #ffffff;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
 }
 
-/* Галерея */
+/* MAIN */
+
+.main {
+  width: 100%;
+}
+
 .gallery-section {
-  margin-top: 40px;
+  width: 100%;
+  text-align: center;
 }
 
 .section-title {
-  font-size: 32px;
-  font-weight: 600;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
+
+/* CARDS */
 
 .cards {
   display: flex;
   flex-wrap: wrap;
-  gap: 24px;
+  justify-content: center;
+  gap: 20px;
 }
 
 .card {
-  width: 260px;
-  background: #f3f4f6;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.08);
+  width: 220px;
+  background: #f3f3f3;
+  color: #000;
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  box-sizing: border-box;
 }
 
 .card-image-wrapper {
   width: 100%;
   aspect-ratio: 4 / 3;
-  border-radius: 8px;
+  background: #ddd;
   overflow: hidden;
-  background: #e5e7eb;
 }
 
 .card-image {
@@ -98,171 +137,102 @@ body,
 }
 
 .card-info {
-  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
 }
 
 .card-title {
   margin: 0;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 1rem;
 }
 
-/* Карточка добавления для владельца */
+.delete-button {
+  padding: 0.3em 0.7em;
+  font-size: 0.9rem;
+}
+
+/* ADD CARD */
+
 .add-card {
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 }
 
 .add-button {
   width: 100%;
-  padding: 16px;
-  border-radius: 8px;
-  border: 1px dashed #6b7280;
-  background: #f9fafb;
-  cursor: pointer;
-  font-size: 16px;
+  height: 100%;
 }
 
+/* ADD FORM */
 
 .add-form {
-  margin-top: 24px;
-  padding: 16px;
-  max-width: 360px;
-  background: #f9fafb;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  margin-top: 30px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-}
-
-.add-form h3 {
-  margin: 0 0 4px;
-  font-size: 18px;
+  gap: 10px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .add-form label {
   display: flex;
   flex-direction: column;
-  font-size: 14px;
-  gap: 4px;
+  align-items: flex-start;
+  gap: 5px;
 }
 
-.add-form input[type="text"] {
-  padding: 6px 8px;
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
+.add-form input[type="text"],
+.add-form input[type="file"] {
+  width: 100%;
 }
 
 .add-form-buttons {
   display: flex;
-  gap: 8px;
-  margin-top: 8px;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
-.add-form button {
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: 1px solid #111827;
+/* VIEWER — большой блок снизу */
+
+.viewer {
+  margin-top: 60px;
+  padding: 30px 20px 40px;
   background: #ffffff;
-  cursor: pointer;
-  font-size: 14px;
+  color: #000000;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  text-align: center;
 }
 
-.add-form button[type="submit"] {
-  background: #111827;
-  color: #ffffff;
+.viewer-close {
+  float: right;
+  margin-bottom: 10px;
 }
 
-
-.owner-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.owner-status {
-  font-size: 14px;
-  color: #4b5563;
-}
-
-.delete-button {
-  margin-top: 8px;
-  padding: 6px 10px;
-  font-size: 12px;
-  border-radius: 4px;
-  border: 1px solid #b91c1c;
-  background: #fee2e2;
-  color: #b91c1c;
-  cursor: pointer;
-}
-
-.delete-button:hover {
-  background: #b91c1c;
-  color: #ffffff;
-}
-
-
-
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.65);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 50;
-}
-
-.modal {
-  position: relative;
-  max-width: 960px;
-  width: 95%;
-  background: #ffffff;
-  border-radius: 18px;
-  padding: 20px 22px 24px;
-  box-shadow: 0 25px 45px rgba(15, 23, 42, 0.5);
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-
-.modal-close {
-  position: absolute;
-  top: 10px;
-  right: 14px;
-  border: none;
-  background: transparent;
-  font-size: 22px;
-  cursor: pointer;
-}
-
-.modal-image-wrapper {
+.viewer-image-wrapper {
   width: 100%;
-  max-height: 640px;
-  border-radius: 14px;
+  max-width: 900px;
+  margin: 0 auto 20px;
+  aspect-ratio: 4 / 3;
+  background: #ddd;
   overflow: hidden;
-  background: #e5e7eb;
 }
 
-
-.modal-image {
+.viewer-image {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  display: block;
+  object-fit: cover;
 }
 
-.modal-title {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 600;
+.viewer-title {
+  margin: 0 0 10px;
+  font-size: 1.4rem;
 }
 
-.modal-description {
+.viewer-description {
   margin: 0;
-  font-size: 14px;
-  color: #4b5563;
 }

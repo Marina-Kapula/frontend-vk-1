@@ -23,12 +23,13 @@ a:hover {
 }
 
 body {
+  min-height: 100vh;
   margin: 0;
   display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  flex-direction: column;   /* сверху вниз: заголовок, инфо, галерея */
+  align-items: center;      /* центр по горизонтали */
 }
+
 
 h1 {
   font-size: 3.2em;
