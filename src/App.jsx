@@ -3,9 +3,9 @@ import "./App.css";
 
 // стартовый список скульптур
 const initialSculptures = [
-  { id: 1, title: "Bear", imageUrl: "https://via.placeholder.com/800x600" },
-  { id: 2, title: "Watcher I", imageUrl: "https://via.placeholder.com/800x600" },
-  { id: 3, title: "Stone figure", imageUrl: "https://via.placeholder.com/800x600" },
+  { id: 1, title: "Bear", images: ["https://via.placeholder.com/800x600"] },
+  { id: 2, title: "Watcher I", images: ["https://via.placeholder.com/800x600"] },
+  { id: 3, title: "Stone figure", images: ["https://via.placeholder.com/800x600"] },
 ];
 
 function App() {
@@ -15,13 +15,15 @@ function App() {
 
   const [isAdding, setIsAdding] = useState(false);
   const [newTitle, setNewTitle] = useState("");
-  const [newFile, setNewFile] = useState(null);
+  const [newFiles, setNewFiles] = useState([]);
 
-  const [activeSculpture, setActiveSculpture] = useState(null);
+  // индекс текущей скульптуры для viewer
+  const [currentIndex, setCurrentIndex] = useState(null);
+  // индекс текущей фотки внутри выбранной скульптуры
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const handleOwnerLogin = () => {
     if (isOwner) return;
-
     const password = window.prompt("Enter owner password:");
     if (password === "admin123") {
       setIsOwner(true);
@@ -35,43 +37,44 @@ function App() {
     setIsOwner(false);
     setIsAdding(false);
     setNewTitle("");
-    setNewFile(null);
-    setActiveSculpture(null);
+    setNewFiles([]);
+    setCurrentIndex(null);
+    setCurrentImageIndex(0);
   };
 
   const handleOpenAddForm = () => {
     if (!isOwner) return;
     setIsAdding(true);
     setNewTitle("");
-    setNewFile(null);
+    setNewFiles([]);
   };
 
   const handleCancelAdd = () => {
     setIsAdding(false);
     setNewTitle("");
-    setNewFile(null);
+    setNewFiles([]);
   };
 
   const handleSaveNew = (event) => {
     event.preventDefault();
-    if (!newTitle || !newFile) {
-      alert("Please add title and image");
+    if (!newTitle || newFiles.length === 0) {
+      alert("Please add title and at least one image");
       return;
     }
 
-    const imageUrl = URL.createObjectURL(newFile);
+    const images = newFiles.map((file) => URL.createObjectURL(file));
 
     const newSculpture = {
       id: nextId,
       title: newTitle,
-      imageUrl,
+      images, // массив ссылок
     };
 
     setSculptures((prev) => [...prev, newSculpture]);
     setNextId((id) => id + 1);
     setIsAdding(false);
     setNewTitle("");
-    setNewFile(null);
+    setNewFiles([]);
   };
 
   const handleDelete = (id) => {
@@ -81,9 +84,42 @@ function App() {
     setSculptures((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const handleCloseViewer = () => {
-    setActiveSculpture(null);
+  // открыть viewer на конкретной карточке
+  const handleOpenViewer = (index) => {
+    setCurrentIndex(index);
+    setCurrentImageIndex(0); // всегда с первой фотки
   };
+
+  const handleCloseViewer = () => {
+    setCurrentIndex(null);
+    setCurrentImageIndex(0);
+  };
+
+  // БОЛЬШИЕ стрелки: листаем ФОТКИ внутри одной карточки
+  const handleNextImage = () => {
+    if (currentIndex === null) return;
+    const item = sculptures[currentIndex];
+    if (!item || item.images.length === 0) return;
+
+    setCurrentImageIndex((prev) => {
+      const last = item.images.length - 1;
+      return prev === last ? 0 : prev + 1;
+    });
+  };
+
+  const handlePrevImage = () => {
+    if (currentIndex === null) return;
+    const item = sculptures[currentIndex];
+    if (!item || item.images.length === 0) return;
+
+    setCurrentImageIndex((prev) => {
+      const last = item.images.length - 1;
+      return prev === 0 ? last : prev - 1;
+    });
+  };
+
+  const activeSculpture =
+    currentIndex !== null ? sculptures[currentIndex] : null;
 
   return (
     <div className="page">
@@ -118,15 +154,15 @@ function App() {
           <h2 className="section-title">Gallery</h2>
 
           <div className="cards">
-            {sculptures.map((item) => (
+            {sculptures.map((item, index) => (
               <article
                 className="card"
                 key={item.id}
-                onClick={() => setActiveSculpture(item)}
+                onClick={() => handleOpenViewer(index)}
               >
                 <div className="card-image-wrapper">
                   <img
-                    src={item.imageUrl}
+                    src={item.images[0]}
                     alt={item.title}
                     className="card-image"
                   />
@@ -169,11 +205,14 @@ function App() {
                 />
               </label>
               <label>
-                Image:
+                Images:
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={(e) => setNewFile(e.target.files[0] || null)}
+                  multiple
+                  onChange={(e) =>
+                    setNewFiles(Array.from(e.target.files))
+                  }
                 />
               </label>
               <div className="add-form-buttons">
@@ -186,23 +225,41 @@ function App() {
           )}
         </section>
 
-        {/* БОЛЬШОЙ БЛОК СНИЗУ — ПОЯВЛЯЕТСЯ ТОЛЬКО ЕСЛИ ЧТО-ТО ВЫБРАНО */}
         {activeSculpture && (
           <section className="viewer">
             <button className="viewer-close" onClick={handleCloseViewer}>
               ✕
             </button>
-            <div className="viewer-image-wrapper">
-              <img
-                src={activeSculpture.imageUrl}
-                alt={activeSculpture.title}
-                className="viewer-image"
-              />
+
+            <div className="viewer-inner">
+              {/* большие стрелки листают ФОТКИ */}
+              <button className="viewer-arrow" onClick={handlePrevImage}>
+                ‹
+              </button>
+
+              <div className="viewer-image-wrapper">
+                <img
+                  src={activeSculpture.images[currentImageIndex]}
+                  alt={activeSculpture.title}
+                  className="viewer-image"
+                />
+              </div>
+
+              <button className="viewer-arrow" onClick={handleNextImage}>
+                ›
+              </button>
             </div>
+
             <h3 className="viewer-title">{activeSculpture.title}</h3>
             <p className="viewer-description">
               Here will be a longer description of the sculpture.
             </p>
+
+            {activeSculpture.images.length > 1 && (
+              <p className="viewer-counter">
+                {currentImageIndex + 1}/{activeSculpture.images.length}
+              </p>
+            )}
           </section>
         )}
       </main>
