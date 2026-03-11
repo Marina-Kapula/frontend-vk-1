@@ -1,26 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 
-// стартовый список скульптур
-const initialSculptures = [
-  { id: 1, title: "Bear", images: ["https://via.placeholder.com/800x600"] },
-  { id: 2, title: "Watcher I", images: ["https://via.placeholder.com/800x600"] },
-  { id: 3, title: "Stone figure", images: ["https://via.placeholder.com/800x600"] },
-];
+const API_BASE = "http://localhost:4000";
 
 function App() {
   const [isOwner, setIsOwner] = useState(false);
-  const [sculptures, setSculptures] = useState(initialSculptures);
+
+  const [sculptures, setSculptures] = useState([]);
   const [nextId, setNextId] = useState(4);
 
   const [isAdding, setIsAdding] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newFiles, setNewFiles] = useState([]);
 
-  // индекс текущей скульптуры для viewer
   const [currentIndex, setCurrentIndex] = useState(null);
-  // индекс текущей фотки внутри выбранной скульптуры
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // при загрузке тянем список скульптур с бекенда
+  useEffect(() => {
+    const fetchSculptures = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/api/sculptures`);
+        if (!response.ok) {
+          console.error("Failed to load sculptures, status:", response.status);
+          return;
+        }
+        const data = await response.json();
+        setSculptures(data);
+
+        const maxId = data.reduce(
+          (max, s) => (s.id > max ? s.id : max),
+          0
+        );
+        setNextId(maxId + 1);
+      } catch (error) {
+        console.error("Failed to load sculptures", error);
+      }
+    };
+
+    fetchSculptures();
+  }, []);
 
   const handleOwnerLogin = () => {
     if (isOwner) return;
@@ -55,39 +74,78 @@ function App() {
     setNewFiles([]);
   };
 
-  const handleSaveNew = (event) => {
+  // сохранение НОВОЙ скульптуры с реальными файлами через FormData
+  const handleSaveNew = async (event) => {
     event.preventDefault();
     if (!newTitle || newFiles.length === 0) {
       alert("Please add title and at least one image");
       return;
     }
 
-    const images = newFiles.map((file) => URL.createObjectURL(file));
+    try {
+      const formData = new FormData();
+      formData.append("title", newTitle);
+      newFiles.forEach((file) => {
+        formData.append("images", file); // "images" — то же имя, что в upload.array
+      });
 
-    const newSculpture = {
-      id: nextId,
-      title: newTitle,
-      images, // массив ссылок
-    };
+      const response = await fetch(`${API_BASE}/api/sculptures`, {
+        method: "POST",
+        body: formData,
+      });
 
-    setSculptures((prev) => [...prev, newSculpture]);
-    setNextId((id) => id + 1);
-    setIsAdding(false);
-    setNewTitle("");
-    setNewFiles([]);
+      if (!response.ok) {
+        let errMsg = "Error while saving sculpture";
+        try {
+          const err = await response.json();
+          console.error("Failed to create sculpture", err);
+          if (err && err.error) errMsg = err.error;
+        } catch {
+          // ignore
+        }
+        alert(errMsg);
+        return;
+      }
+
+      const created = await response.json();
+
+      setSculptures((prev) => [...prev, created]);
+      setNextId((id) => id + 1);
+      setIsAdding(false);
+      setNewTitle("");
+      setNewFiles([]);
+    } catch (error) {
+      console.error("Upload request failed", error);
+      alert("Network error while uploading");
+    }
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (!isOwner) return;
     const ok = window.confirm("Delete this sculpture?");
     if (!ok) return;
-    setSculptures((prev) => prev.filter((item) => item.id !== id));
+
+    try {
+      const response = await fetch(`${API_BASE}/api/sculptures/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok && response.status !== 204) {
+        console.error("Failed to delete, status:", response.status);
+        alert("Error while deleting sculpture");
+        return;
+      }
+
+      setSculptures((prev) => prev.filter((item) => item.id !== id));
+    } catch (error) {
+      console.error("Delete request failed", error);
+      alert("Network error while deleting");
+    }
   };
 
-  // открыть viewer на конкретной карточке
   const handleOpenViewer = (index) => {
     setCurrentIndex(index);
-    setCurrentImageIndex(0); // всегда с первой фотки
+    setCurrentImageIndex(0);
   };
 
   const handleCloseViewer = () => {
@@ -95,7 +153,6 @@ function App() {
     setCurrentImageIndex(0);
   };
 
-  // БОЛЬШИЕ стрелки: листаем ФОТКИ внутри одной карточки
   const handleNextImage = () => {
     if (currentIndex === null) return;
     const item = sculptures[currentIndex];
@@ -232,7 +289,6 @@ function App() {
             </button>
 
             <div className="viewer-inner">
-              {/* большие стрелки листают ФОТКИ */}
               <button className="viewer-arrow" onClick={handlePrevImage}>
                 ‹
               </button>
