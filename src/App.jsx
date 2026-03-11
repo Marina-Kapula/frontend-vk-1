@@ -11,6 +11,7 @@ function App() {
 
   const [isAdding, setIsAdding] = useState(false);
   const [newTitle, setNewTitle] = useState("");
+  const [newDescription, setNewDescription] = useState("");
   const [newFiles, setNewFiles] = useState([]);
 
   const [currentIndex, setCurrentIndex] = useState(null);
@@ -56,6 +57,7 @@ function App() {
     setIsOwner(false);
     setIsAdding(false);
     setNewTitle("");
+    setNewDescription("");
     setNewFiles([]);
     setCurrentIndex(null);
     setCurrentImageIndex(0);
@@ -65,16 +67,18 @@ function App() {
     if (!isOwner) return;
     setIsAdding(true);
     setNewTitle("");
+    setNewDescription("");
     setNewFiles([]);
   };
 
   const handleCancelAdd = () => {
     setIsAdding(false);
     setNewTitle("");
+    setNewDescription("");
     setNewFiles([]);
   };
 
-  // сохранение НОВОЙ скульптуры с реальными файлами через FormData
+  // сохранение НОВОЙ скульптуры с title + description + файлами
   const handleSaveNew = async (event) => {
     event.preventDefault();
     if (!newTitle || newFiles.length === 0) {
@@ -85,8 +89,9 @@ function App() {
     try {
       const formData = new FormData();
       formData.append("title", newTitle);
+      formData.append("description", newDescription); // новое поле описания
       newFiles.forEach((file) => {
-        formData.append("images", file); // "images" — то же имя, что в upload.array
+        formData.append("images", file);
       });
 
       const response = await fetch(`${API_BASE}/api/sculptures`, {
@@ -113,6 +118,7 @@ function App() {
       setNextId((id) => id + 1);
       setIsAdding(false);
       setNewTitle("");
+      setNewDescription("");
       setNewFiles([]);
     } catch (error) {
       console.error("Upload request failed", error);
@@ -253,7 +259,8 @@ function App() {
           {isOwner && isAdding && (
             <form className="add-form" onSubmit={handleSaveNew}>
               <h3>Add new sculpture</h3>
-              <label>
+
+              <label className="add-label">
                 Title:
                 <input
                   type="text"
@@ -261,7 +268,18 @@ function App() {
                   onChange={(e) => setNewTitle(e.target.value)}
                 />
               </label>
-              <label>
+
+              <label className="add-label">
+                Description:
+                <textarea
+                  className="add-description"
+                  value={newDescription}
+                  onChange={(e) => setNewDescription(e.target.value)}
+                  rows={5}
+                />
+              </label>
+
+              <label className="add-label">
                 Images:
                 <input
                   type="file"
@@ -272,6 +290,7 @@ function App() {
                   }
                 />
               </label>
+
               <div className="add-form-buttons">
                 <button type="submit">Save</button>
                 <button type="button" onClick={handleCancelAdd}>
@@ -308,7 +327,8 @@ function App() {
 
             <h3 className="viewer-title">{activeSculpture.title}</h3>
             <p className="viewer-description">
-              Here will be a longer description of the sculpture.
+              {activeSculpture.description ||
+                "Here will be a longer description of the sculpture."}
             </p>
 
             {activeSculpture.images.length > 1 && (
