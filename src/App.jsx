@@ -17,6 +17,8 @@ function App() {
   const [currentIndex, setCurrentIndex] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+
+
   // при загрузке тянем список скульптур с бекенда
   useEffect(() => {
     const fetchSculptures = async () => {
@@ -300,6 +302,12 @@ function App() {
             </form>
           )}
         </section>
+
+
+
+      
+
+
 
         {activeSculpture && (
           <section className="viewer">
